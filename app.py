@@ -43,6 +43,13 @@ if uploaded_file is not None:
     scaler = joblib.load("model/scaler.pkl")
 
     # Adjust this based on your dataset
+    # Remove Id column if present
+if "Id" in df.columns:
+    df = df.drop("Id", axis=1)
+
+X = df.drop("Class", axis=1)
+y = df["Class"]
+
     X = df.drop("Class", axis=1)
     y = df["Class"]
 

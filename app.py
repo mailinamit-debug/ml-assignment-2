@@ -47,6 +47,7 @@ if uploaded_file is not None:
     y = df["Class"]
     # Convert to numpy array
     X = X.values
+    st.write("Feature count being passed:", X.shape[1])
 
     # Load preprocessing objects
     imputer = joblib.load("model/imputer.pkl")

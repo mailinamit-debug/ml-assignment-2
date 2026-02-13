@@ -40,6 +40,7 @@ if uploaded_file is not None:
 
     # Remove unnamed index column if present
     df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+
     # Remove Id column if present
     if "Id" in df.columns:
     df = df.drop("Id", axis=1)
@@ -47,8 +48,10 @@ if uploaded_file is not None:
     # Separate features and target
     X = df.drop("Class", axis=1)
     y = df["Class"]
-    # Convert to numpy array
+
+    # Convert features to numpy array
     X = X.values
+
     st.write("Feature count being passed:", X.shape[1])
 
     # Load preprocessing objects

@@ -15,10 +15,8 @@ st.set_page_config(page_title="ML Classification App")
 
 st.title("Machine Learning Classification App")
 
-# Upload CSV
 uploaded_file = st.file_uploader("Upload Test CSV File", type=["csv"])
 
-# Model selection dropdown
 model_option = st.selectbox(
     "Select Model",
     [
@@ -43,16 +41,14 @@ if uploaded_file is not None:
 
     # Remove Id column if present
     if "Id" in df.columns:
-    df = df.drop("Id", axis=1)
+        df = df.drop("Id", axis=1)
 
     # Separate features and target
     X = df.drop("Class", axis=1)
     y = df["Class"]
 
-    # Convert features to numpy array
+    # Convert to numpy array
     X = X.values
-
-    st.write("Feature count being passed:", X.shape[1])
 
     # Load preprocessing objects
     imputer = joblib.load("model/imputer.pkl")
@@ -76,7 +72,6 @@ if uploaded_file is not None:
 
     y_pred = model.predict(X)
 
-    # Metrics
     st.subheader("Evaluation Metrics")
 
     st.write("Accuracy:", accuracy_score(y, y_pred))

@@ -38,26 +38,23 @@ if uploaded_file is not None:
     st.write("Uploaded Data Preview:")
     st.write(df.head())
 
-    # Load preprocessing
-    imputer = joblib.load("model/imputer.pkl")
-    scaler = joblib.load("model/scaler.pkl")
-
-    # Adjust this based on your dataset
     # Remove Id column if present
-if "Id" in df.columns:
-    df = df.drop("Id", axis=1)
+    if "Id" in df.columns:
+        df = df.drop("Id", axis=1)
 
-X = df.drop("Class", axis=1)
-y = df["Class"]
-
+    # Separate features and target
     X = df.drop("Class", axis=1)
     y = df["Class"]
+
+    # Load preprocessing objects
+    imputer = joblib.load("model/imputer.pkl")
+    scaler = joblib.load("model/scaler.pkl")
 
     # Apply preprocessing
     X = imputer.transform(X)
     X = scaler.transform(X)
 
-    # Load model
+    # Load selected model
     model_paths = {
         "Logistic Regression": "model/logistic_regression.pkl",
         "Decision Tree": "model/decision_tree.pkl",
@@ -71,11 +68,6 @@ y = df["Class"]
 
     y_pred = model.predict(X)
 
-    if hasattr(model, "predict_proba"):
-        y_prob = model.predict_proba(X)[:, 1]
-        auc = roc_auc_score(y, y_prob)
-        st.write("AUC:", auc)
-
     # Metrics
     st.subheader("Evaluation Metrics")
 
@@ -85,7 +77,9 @@ y = df["Class"]
     st.write("F1 Score:", f1_score(y, y_pred))
     st.write("MCC:", matthews_corrcoef(y, y_pred))
 
-    # Confusion Matrix
+    if hasattr(model, "predict_proba"):
+        y_prob = model.predict_proba(X)[:, 1]
+        st.write("AUC:", roc_auc_score(y, y_prob))
+
     st.subheader("Confusion Matrix")
-    cm = confusion_matrix(y, y_pred)
-    st.write(cm)
+    st.write(confusion_matrix(y, y_pred))

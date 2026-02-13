@@ -51,7 +51,7 @@ if uploaded_file is not None:
     scaler = joblib.load("model/scaler.pkl")
 
     # Apply preprocessing
-    X = imputer.transform(X)
+    X = imputer.transform(X.values)
     X = scaler.transform(X)
 
     # Load selected model

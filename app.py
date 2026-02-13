@@ -45,13 +45,15 @@ if uploaded_file is not None:
     # Separate features and target
     X = df.drop("Class", axis=1)
     y = df["Class"]
+    # Convert to numpy array
+    X = X.values
 
     # Load preprocessing objects
     imputer = joblib.load("model/imputer.pkl")
     scaler = joblib.load("model/scaler.pkl")
 
     # Apply preprocessing
-    X = imputer.transform(X.values)
+    X = imputer.transform(X)
     X = scaler.transform(X)
 
     # Load selected model

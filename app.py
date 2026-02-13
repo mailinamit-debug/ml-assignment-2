@@ -38,9 +38,11 @@ if uploaded_file is not None:
     st.write("Uploaded Data Preview:")
     st.write(df.head())
 
+    # Remove unnamed index column if present
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
     # Remove Id column if present
     if "Id" in df.columns:
-        df = df.drop("Id", axis=1)
+    df = df.drop("Id", axis=1)
 
     # Separate features and target
     X = df.drop("Class", axis=1)

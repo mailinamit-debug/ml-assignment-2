@@ -8,7 +8,10 @@ st.set_page_config(page_title="Bank Marketing ML App")
 st.title("🏦 Bank Marketing Classification App")
 st.write("Upload Bank Marketing CSV file to predict term deposit subscription.")
 
+# ==============================
 # Load saved objects
+# ==============================
+
 scaler = joblib.load("model/scaler.pkl")
 feature_columns = joblib.load("model/feature_columns.pkl")
 
@@ -21,6 +24,10 @@ models = {
     "XGBoost": joblib.load("model/xgboost.pkl")
 }
 
+# ==============================
+# File Upload & Model Selection
+# ==============================
+
 uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
 model_choice = st.selectbox(
@@ -28,30 +35,58 @@ model_choice = st.selectbox(
     list(models.keys())
 )
 
+# ==============================
+# Prediction Logic
+# ==============================
+
 if uploaded_file is not None:
 
-    data = pd.read_csv(uploaded_file, sep=";")
+    try:
+        # Read CSV (Bank dataset uses ;)
+        data = pd.read_csv(uploaded_file, sep=";")
 
-    if "y" in data.columns:
-        data = data.drop("y", axis=1)
+        # Drop target if present
+        if "y" in data.columns:
+            data = data.drop("y", axis=1)
 
-    # One-hot encoding
-    data = pd.get_dummies(data, drop_first=True)
+        # One-hot encode
+        data = pd.get_dummies(data, drop_first=True)
 
-    # Align columns with training data
-    data = data.reindex(columns=feature_columns, fill_value=0)
+        # ------------------------------
+        # SAFE COLUMN ALIGNMENT
+        # ------------------------------
 
-    # Scale
-    data_scaled = scaler.transform(data)
+        # Add missing columns
+        for col in feature_columns:
+            if col not in data.columns:
+                data[col] = 0
 
-    model = models[model_choice]
+        # Keep only training columns in correct order
+        data = data[feature_columns]
 
-    predictions = model.predict(data_scaled)
+        # Ensure numeric
+        data = data.astype(float)
 
-    st.subheader("Predictions")
-    st.write(predictions)
+        # Scale
+        data_scaled = scaler.transform(data)
 
-    if hasattr(model, "predict_proba"):
-        probabilities = model.predict_proba(data_scaled)[:, 1]
-        st.subheader("Prediction Probabilities")
-        st.write(probabilities)
+        # Predict
+        model = models[model_choice]
+        predictions = model.predict(data_scaled)
+
+        # Convert 0/1 to labels
+        label_map = {0: "No Subscription", 1: "Subscribed"}
+        predictions_label = [label_map[p] for p in predictions]
+
+        st.subheader("📊 Predictions")
+        st.write(predictions_label)
+
+        # Show probabilities if available
+        if hasattr(model, "predict_proba"):
+            probabilities = model.predict_proba(data_scaled)[:, 1]
+            st.subheader("📈 Subscription Probability")
+            st.write(probabilities)
+
+    except Exception as e:
+        st.error("Error processing file. Please ensure you uploaded correct Bank Marketing dataset format.")
+        st.write(e)

@@ -79,7 +79,18 @@ if uploaded_file is not None:
         predictions_label = [label_map[p] for p in predictions]
 
         st.subheader("📊 Predictions")
-        st.write(predictions_label)
+
+        result_df = pd.DataFrame({
+        "Prediction": predictions_label
+            })
+
+        st.dataframe(result_df.head(50))
+        st.write(f"Total Predictions: {len(result_df)}")
+
+        # Summary
+        st.subheader("Prediction Summary")
+        summary = result_df["Prediction"].value_counts()
+        st.write(summary)
 
         # Show probabilities if available
         if hasattr(model, "predict_proba"):
